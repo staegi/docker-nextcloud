@@ -1,0 +1,45 @@
+version: '3'
+services:
+  redis:
+    image: webhippie/redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+  database:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: nextcloud
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: nextcloud
+  nextcloud:
+    build: .
+    depends_on:
+      - database
+      - redis
+    ports:
+      - "80:80"
+    restart: always
+    links:
+      - database
+      - redis
+    volumes:
+      - nextcloud_apps:/var/www/html/custom_apps
+      - nextcloud_data:/var/www/html/data
+      - nextcloud_themes:/var/www/html/themes
+    environment:
+      NEXTCLOUD_ADMIN_PASSWORD: admin
+      NEXTCLOUD_DB_PASSWORD: nextcloud
+      NEXTCLOUD_REDIS_HOST: redis
+volumes:
+    db_data:
+    nextcloud_apps:
+    nextcloud_config:
+    nextcloud_data:
+    nextcloud_themes:
+
